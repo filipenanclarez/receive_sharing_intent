@@ -24,6 +24,15 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URLConnection
 
+import android.app.Activity
+import androidx.annotation.NonNull
+import io.flutter.plugin.common.EventChannel.EventSink
+
+import android.util.Log
+
+
+
+
 private const val MESSAGES_CHANNEL = "receive_sharing_intent/messages"
 private const val EVENTS_CHANNEL_MEDIA = "receive_sharing_intent/events-media"
 private const val EVENTS_CHANNEL_TEXT = "receive_sharing_intent/events-text"
@@ -128,10 +137,19 @@ class ReceiveSharingIntentPlugin : FlutterPlugin, ActivityAware, MethodCallHandl
                 latestText = value
                 eventSinkText?.success(latestText)
             }
-            intent.action == Intent.ACTION_VIEW -> { // Opening URL
-                val value = intent.dataString
-                if (initial) initialText = value
-                latestText = value
+            (intent.action == Intent.ACTION_VIEW) -> {
+                // Log.e("ReceiveSharing", intent.dataString)
+                // var value = intent.dataString                
+                // Log.e("ReceiveSharing", "value: $value")
+                
+                var uri = intent.getData()
+                if ( uri != null ){
+                    val path = FileDirectory.getAbsolutePath(applicationContext, uri)
+                    // Log.e("ReceiveSharing", "path: $path")
+                }                
+                
+                if (initial) initialText = path
+                latestText = path
                 eventSinkText?.success(latestText)
             }
         }
@@ -172,7 +190,7 @@ class ReceiveSharingIntentPlugin : FlutterPlugin, ActivityAware, MethodCallHandl
                             .put("duration", duration)
                 }?.toList()
                 if (value != null) JSONArray(value) else null
-            }
+            }            
             else -> null
         }
     }
